@@ -44,7 +44,7 @@ export function useEventListener(target, event, callback) {
 
 ```vue
 <script setup>
-  const myDirective = {
+  const vFocus = {
   created(el, binding, vnode, prevVnode) {},
   beforeMount(el, binding, vnode, prevVnode) {},
   mounted(el, binding, vnode, prevVnode) {

@@ -25,7 +25,7 @@ HTML、CSS、JavaScript、Vue.js 等前端技术
 
 1. [快速上手](./vue/start.md)
 2. [组件玩法](./vue/components.md)
-3. [深入原理](./vue/extra.md)
+3. [进阶深入](./vue/extra.md)
 4. [Vue Router](./vue/router.md)
 5. [Pinia](./vue/pinia.md)
 6. [NuxtJS](./vue/nuxt.md)
