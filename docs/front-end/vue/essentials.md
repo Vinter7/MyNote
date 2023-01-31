@@ -229,8 +229,8 @@
 - 访问子组件中的值
   - `<slot m="string" name="abc">`
     - 可以使用`v-bind="对象"`传全部值
-  - `<MyComonent v-slot="newName">{{newName.m}}</>`
-  - `<template #abc="newObj">{{newObj.a/b/c}} or #abc={a,b,c}`然后直接用
+  - `<MyComonent v-slot="newName">newName.m</>`
+  - `<template #abc="newObj">newObj.a/b/c or #abc={a,b,c}`然后直接用
 - 无渲染组件
   - 子组件只包括逻辑 不做渲染 将数据用`<slot>`传值
   - `<template><slot :a="a" :b="b" /></>`

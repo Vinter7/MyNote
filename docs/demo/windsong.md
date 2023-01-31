@@ -9,5 +9,6 @@ import WindsongLyre from '../components/WindsongLyre.vue'
 点击之外可以使用键盘输入进行弹奏
 
 
-
-<WindsongLyre />
+<ClientOnly>
+  <WindsongLyre />
+</ClientOnly>

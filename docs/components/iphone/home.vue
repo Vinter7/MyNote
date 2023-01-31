@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import Swiper from 'https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.esm.browser.min.js'
+import Swiper from './swiper'
 onMounted(() => {
   let swiper = new Swiper('.mySwiper', {
     pagination: {
