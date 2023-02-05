@@ -75,23 +75,22 @@ function func(nums1, nums2) {
 
 ```js
 function func(s) {
-  let save = []
+  let save = s[0]
   for (let i = 0; i < s.length; i++) {
     let same = [],
       ii = i
     for (let j = i + 1; j < s.length; j++) {
       if (s[j] === s[i]) same.push(j)
     }
-    while (same.length) {
-      let j = same.pop(),
-        jj = j
-      while (jj > ii) {
-        if (s[--jj] !== s[++ii]) break
+    q: for (const j of same.reverse()) {
+      for (let k = 1; k < (j - i) / 2; k++) {
+        if (s[i + k] !== s[j - k]) continue q
       }
-      if (ii >= jj) save.push(s.substring(i, j + 1))
+      let ss =s.substring(i, j + 1)
+      if(ss.length>save.length) save = ss
     }
   }
-  return save.sort((a, b) => a.length - b.length).pop()
+  return save
 }
 ```
 
@@ -100,17 +99,7 @@ function func(s) {
 
 ```js
 function func(s, p) {
-  for (let i = 0; i < s.length; i++) {
-    if (s[i] !== p[i]) {
-      if (p[i] === '.') continue
-      else if (p[i] === '*') {
-        if (p[i - 1] === '.') break
-        else if (s.substr(i) === s[i - 1].repeat(s.length - i)) break
-        else return false
-      } else return false
-    }
-  }
-  return true
+  return s.match(p)?.[0] === s
 }
 ```
 
@@ -119,14 +108,16 @@ function func(s, p) {
 
 ```js
 function func(nums) {
-  let s1 = []
-  for (let i = 0; i < nums.length - 1; i++) {
-    let s2 = []
-    for (let j = i; j < nums.length; j++)
-      s2.push(Math.min(nums[i], nums[j]) * (j - i))
-    s1.push(Math.max(...s2))
+  let i = 0,
+    j = nums.length - 1,
+    ans = 0
+  while (i < j) {
+    let area = Math.min(nums[i], nums[j]) * (j - i)
+    if (area > ans) ans = area
+    if (nums[i] > nums[j]) j -= 1
+    else i += 1
   }
-  return Math.max(...s1)
+  return ans
 }
 ```
 
@@ -134,30 +125,33 @@ function func(nums) {
 
 ```js
 function func(n) {
-  let sp = {
-    4: 'IV',
-    40: 'IL',
-    400: 'ID',
-    9: 'IX',
-    90: 'IC',
-    900: 'IM',
-  }
-  if (sp[n]) return sp[n]
-
   let str = '',
-    nn = n
-  m = {
-    1000: 'M',
-    500: 'D',
-    100: 'C',
-    50: 'L',
-    10: 'X',
-    5: 'V',
-    1: 'I',
-  }
+    m = {
+      1000: 'M',
+      500: 'D',
+      100: 'C',
+      50: 'L',
+      10: 'X',
+      5: 'V',
+      1: 'I',
+    }
   for (i of [1000, 500, 100, 50, 10, 5, 1]) {
-    str += m[i].repeat(nn / i)
-    nn = nn % i
+    str += m[i].repeat(n / i)
+    n = n % i
+  }
+
+  let map = {
+    DCCCC: 'CM',
+    CCCC: 'CD',
+    LXXXX: 'XC',
+    XXXX: 'XL',
+    VIIII: 'IX',
+    IIII: 'IV',
+  }
+  for (const i in map) {
+    let idx = str.indexOf(i)
+    if (~idx)
+      str = str.substring(0, idx) + map[i] + str.substring(idx + i.length)
   }
   return str
 }
