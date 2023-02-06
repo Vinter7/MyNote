@@ -161,22 +161,37 @@ function func(n) {
 
 ```js
 function func(nums) {
-  let arr = []
-  for (let i = 0; i < nums.length; i++) {
-    if (nums[i] === null) continue
-    for (let j = i + 1; j < nums.length; j++) {
-      for (let k = j + 1; k < nums.length; k++) {
-        if (nums[i] + nums[j] + nums[k] === 0)
-          arr.push([nums[i], nums[j], nums[k]])
-      }
-    }
+  let l = nums.length,
+    ans = []
+  if (l < 3) return ans
+  if (l === 3 && nums[0] + nums[1] + nums[2] !== 0) return ans
+
+  // 三重值
+  let has0 = 0
+  for (const i of nums) {
+    if (i === 0) has0 += 1
   }
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = i + 1; j < arr.length; j++) {
-      if (new Set([...arr[i], ...arr[j]]).size === 3) arr.splice(j, 1)
-    }
+  if (has0 >= 3) ans.push([0, 0, 0])
+  // 双重值
+  let hasDb = []
+  let set = Array.from(new Set(nums))
+  for (const i of set) {
+    if (nums.indexOf(i) !== nums.lastIndexOf(i)) hasDb.push(i)
   }
-  return arr
+  for (const i of hasDb) {
+    let idx = set.indexOf(0 - 2 * i)
+    if (~idx && i !== 0) ans.push([i, i, set[idx]])
+  }
+  // 单值
+  let map = {}
+  for (let i = 0; i < set.length; i++) {
+    for (let j = i + 1; j < set.length; j++) {
+      if (set[j] in map) ans.push([set[i], set[map[set[j]]], set[j]])
+      else map[0 - set[i] - set[j]] = j
+    }
+    map = {}
+  }
+  return ans
 }
 ```
 
@@ -184,10 +199,11 @@ function func(nums) {
 
 ```js
 function func(s) {
+  if ((s === '')) return []
   let m = ['abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz']
   let save = []
   for (let i of s) save.push(m[+i - 2])
-  let allOut = [...save.shift()]
+  let allOut = save.shift().split('')
   for (let i of save) {
     let out = []
     for (let j of i) for (let k of allOut) out.push(k + j)
@@ -201,16 +217,22 @@ function func(s) {
 
 ```js
 function func(head, n) {
-  let c = 0,a=head,b=a
-  while(head.next!==null){
+  let c = 1,
+    a = head,
+    b = a
+  while (head.next) {
     head = head.next
     c++
   }
-  for(let i =0;i<c-n;i++){
+  if(c<n+1) {
+      a=a.next
+      return a
+  }
+  for (let i = 0; i < c - n-1; i++) {
     a = a.next
   }
-  a.next = a.next.next
-  return  b
+  a.next = a.next?.next
+  return b
 }
 ```
 
@@ -219,17 +241,40 @@ function func(head, n) {
 ```js
 function func(s) {
   let arr = [],
-    $ = {
+    map = {
       '(': ')',
       '[': ']',
       '{': '}',
     }
   for (let i of s) {
-    if ($[i]) arr.push($[i])
+    if (map[i]) arr.push(map[i])
     else if (arr.pop() !== i) return false
   }
   if (arr.length !== 0) return false
   else return true
+}
+```
+
+**合并两个有序链表**
+
+```js
+function func(l1, l2) {
+  if (!(l1 || l2)) return l1
+  let l3 = {},
+    l3$ = l3
+  while (l1 && l2) {
+    if (l1.val < l2.val) {
+      l3$.next = l1
+      l1 = l1.next
+    } else {
+      l3$.next = l2
+      l2 = l2.next
+    }
+    l3$ = l3$.next
+  }
+  if (l2) l3$.next = l2
+  if (l1) l3$.next = l1
+  return l3.next
 }
 ```
 
@@ -256,36 +301,32 @@ function func(n) {
 **合并K个升序链表**
 
 ```js
-function toArr(l) {
-  let arr = []
-  while (l) {
-    arr.push(l.val)
-    l = l.next
+function mergeKLists(lists) {
+if (lists.length === 0) return null
+  let ans = lists[0]
+  for (let i = 1; i < lists.length; i++) {
+    ans = func2(ans, lists[i])
   }
-  return arr
+  return ans
 }
 
-function toL(arr) {
-  let l = {
-    val: arr.shift(),
-    next: null,
+function func2(l1, l2) {
+  if (!(l1 || l2)) return l1
+  let l3 = {},
+    l3$ = l3
+  while (l1 && l2) {
+    if (l1.val < l2.val) {
+      l3$.next = l1
+      l1 = l1.next
+    } else {
+      l3$.next = l2
+      l2 = l2.next
+    }
+    l3$ = l3$.next
   }
-  let node,
-    pnode = l
-  for (const i of arr) {
-    node = { val: i, next: null }
-    pnode.next = node
-    pnode = node
-  }
-  return l
-}
-
-function func(lists){
-  let arr = []
-  for (const i of lists) {
-    arr.push(toArr(i))
-  }
-  return toL(arr.flat().sort())
+  if (l2) l3$.next = l2
+  if (l1) l3$.next = l1
+  return l3.next
 }
 ```
 
@@ -293,16 +334,26 @@ function func(lists){
 
 ```js
 function func(nums) {
-  for (let i = nums.length - 1; i > 0; i--) {
-    if (nums[i] > nums[i - 1])
-      return [
-        ...nums.slice(0, i - 1),
-        nums[i],
-        nums[i - 1],
-        ...nums.slice(i + 1),
-      ]
-    else return nums.reverse()
+  if (nums.length == 1) return nums
+  if (nums.length == 2) return nums.reverse()
+  for (let i = nums.length - 1; i > 1; i--) {
+    if (nums[i] > nums[i - 1] && i > 1) {
+      ;[nums[i], nums[i - 1]] = [nums[i - 1], nums[i]]
+      return nums
+    }
   }
+  if (nums[0] < nums[1]) {
+    let temp = nums.slice(1).sort()
+    for (let i = 0; i < temp.length; i++) {
+      if (temp[i] > nums[0]) {
+        let head = temp[i]
+        temp[i] = nums[0]
+        nums.splice(0, nums.length, head, ...temp)
+        return nums
+      }
+    }
+  }
+  return nums.reverse()
 }
 ```
 ****
