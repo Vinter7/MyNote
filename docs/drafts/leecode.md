@@ -334,32 +334,49 @@ function func2(l1, l2) {
 
 ```js
 function func(nums) {
-  if (nums.length == 1) return nums
-  if (nums.length == 2) return nums.reverse()
-  for (let i = nums.length - 1; i > 1; i--) {
-    if (nums[i] > nums[i - 1] && i > 1) {
-      ;[nums[i], nums[i - 1]] = [nums[i - 1], nums[i]]
-      return nums
-    }
-  }
-  if (nums[0] < nums[1]) {
-    let temp = nums.slice(1).sort()
-    for (let i = 0; i < temp.length; i++) {
-      if (temp[i] > nums[0]) {
-        let head = temp[i]
-        temp[i] = nums[0]
-        nums.splice(0, nums.length, head, ...temp)
-        return nums
+  for (let i = nums.length - 2; i >= 0; i--) {
+    if (nums[i] < nums[i + 1]) {
+      let temp = nums.slice(i + 1).reverse()
+      for (let j = 0; j < temp.length; j++) {
+        if (nums[i] < temp[j]) {
+          let head = temp[j]
+          temp[j] = nums[i]
+          nums.splice(i, temp.length + 1, head, ...temp)
+          return nums
+        }
       }
     }
+    if (i === 0) return nums.reverse()
   }
-  return nums.reverse()
 }
 ```
-****
+**最长有效括号**
 
 ```js
-
+function func(s) {
+  let temp = []
+  for (const i of s) {
+    if (i === '(') temp.push(0)
+    else {
+      let idx = temp.lastIndexOf(0)
+      if (~idx) {
+        temp.splice(idx, 1)
+        temp.push(2)
+      } else temp.push(1)
+    }
+  }
+  let ans = 0,
+    count = 0
+  for (const i of temp) {
+    if (i === 2) count += 2
+    else {
+      if (count > ans) ans = count
+      count = 0
+    }
+  }
+  if (count > ans) ans = count
+  return ans
+}
 ```
 ****
 
