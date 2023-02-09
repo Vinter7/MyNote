@@ -350,6 +350,8 @@ function func(nums) {
   }
 }
 ```
+
+
 **最长有效括号**
 
 ```js
@@ -378,14 +380,122 @@ function func(s) {
   return ans
 }
 ```
-****
+
+
+**组合总和**
 
 ```js
+function func(nums, t) {
+  let ans = []
+  for (let i = nums.length - 1; i >= 0; i--) {
+    if (t >= nums[i]) {
+      if (t === nums[i]) ans.push([nums[i]])
+      break
+    }
+    if (!i) return ans
+  }
+  for (let i = 0; i < nums.length; i++) {
+    let sub = func(nums.slice(0, i + 1), t - nums[i])
+    if (sub.length) {
+      for (const j of sub) j.push(nums[i])
+      ans.push(...sub)
+    } else continue
+  }
+  return ans
+}
 
+const main = (nums, t) => func(nums.sort((a, b) => a - b),t)
 ```
-****
+
+
+**接雨水**
 
 ```js
-
+function func(nums) {
+  const length = nums.length
+  let ans = 0
+  let ii
+  left: for (let i = 0; i < length; i++) {
+    for (let j = i + 1; j < length; j++) {
+      if (nums[j] >= nums[i]) {
+        for (let k = i + 1; k < j; k++) ans += nums[i] - nums[k]
+        i = j - 1
+        break
+      }
+      if (j === length - 1) {
+        ii = i
+        break left
+      }
+    }
+  }
+  for (let i = length - 1; i > ii - 1; i--) {
+    for (let j = i - 1; j > ii - 1; j--) {
+      if (nums[j] >= nums[i]) {
+        for (let k = j + 1; k < i; k++) ans += nums[i] - nums[k]
+        i = j + 1
+        break
+      }
+    }
+  }
+  return ans
+}
 ```
 
+**全排列**
+
+
+```js
+function func(nums) {
+  if (nums.length === 1) return [nums]
+  if (nums.length === 2)
+    return [
+      [nums[0], nums[1]],
+      [nums[1], nums[0]],
+    ]
+  let ans = []
+  for (const i of func(nums.slice(1))) {
+    for (let j = 0; j < i.length + 1; j++) {
+      let temp = [...i]
+      temp.splice(j, 0, nums[0])
+      ans.push(temp)
+    }
+  }
+  return ans
+}
+```
+
+
+**旋转图像**
+
+```js
+function func(nums) {
+  const len = nums.length
+  //奇偶数
+  if (len % 2)
+    for (let i = 0; i < (len + 1) / 2; i++)
+      [nums[i], nums[len - i - 1]] = [nums[len - i - 1], nums[i]]
+  else
+    for (let i = 0; i < len / 2; i++)
+      [nums[i], nums[len - i - 1]] = [nums[len - i - 1], nums[i]]
+
+  for (let i = 0; i < len; i++)
+    for (let j = i + 1; j < len; j++)
+      [nums[i][j], nums[j][i]] = [nums[j][i], nums[i][j]]
+
+  return nums
+}
+```
+
+**字母异位词分组**
+
+```js
+function func(strs) {
+  if (strs.length === 1) return [strs]
+  let map = {}
+  strs.forEach(str => {
+    const key = str.split('').sort().join('')
+    key in map ? map[key].push(str) : (map[key] = [str])
+  })
+  return Object.values(map)
+}
+```
