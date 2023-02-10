@@ -499,3 +499,106 @@ function func(strs) {
   return Object.values(map)
 }
 ```
+
+
+**最大子数组和**
+
+```js
+function func(nums) {
+  for (let i = 1; i < nums.length; i++)
+    nums[i] = nums[i] + (nums[i - 1] > 0 ? nums[i - 1] : 0)
+  return Math.max(...nums)
+}
+```
+
+
+**跳跃游戏**
+
+```js
+function func(nums) {
+  const len = nums.length
+  let step = 0
+  for (let i = 0; i <= step; i++) {
+    if (nums[i] + i > step) step = nums[i] + i
+    if (step >= len - 1) return true
+  }
+  return false
+}
+```
+
+
+**合并区间**
+
+```js
+function func(nums) {
+  nums.sort((a, b) => a[0] - b[0])
+  let ans = [nums[0]]
+  const len = nums.length
+  for (let i = 1; i < len; i++) {
+    let temp = ans[ans.length - 1]
+    if (nums[i][0] <= temp[1]) {
+      if (nums[i][1] > temp[1]) temp[1] = nums[i][1]
+    } else {
+      ans.push(nums[i])
+    }
+  }
+  return ans
+}
+```
+
+
+**不同路径**
+
+```js
+function func(m, n) {
+  const net = new Array(m).fill(0).map(() => new Array(n).fill(0))
+  for (let i = 0; i < m; i++) net[i][0] = 1
+  for (let j = 0; j < n; j++) net[0][j] = 1
+  for (let i = 1; i < m; i++)
+    for (let j = 1; j < n; j++)
+      net[i][j] = net[i - 1][j] + net[i][j - 1]
+
+  return net[m - 1][n - 1]
+}
+```
+
+**最小路径和**
+
+```js
+function minPathSum(nums) {
+  const [m, n] = [nums.length, nums[0].length]
+  for (let i = 1; i < m; i++) nums[i][0] += nums[i - 1][0]
+  for (let i = 1; i < n; i++) nums[0][i] += nums[0][i - 1]
+  for (let i = 1; i < m; i++) {
+    for (let j = 1; j < n; j++)
+      nums[i][j] +=
+        nums[i - 1][j] < nums[i][j - 1]
+          ? nums[i - 1][j]
+          : nums[i][j - 1]
+  }
+  return nums[m - 1][n - 1]
+}
+```
+**爬楼梯**
+
+```js
+function func(n) {
+  let ans = new Array(n).fill(0)
+  ans[1] = 1
+  ans[2] = 2
+  for (let i = 3; i <= n; i++) {
+    ans[i] = ans[i - 1] + ans[i - 2]
+  }
+  return ans[n]
+}
+```
+****
+
+```js
+
+```
+****
+
+```js
+
+```
