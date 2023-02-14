@@ -8,7 +8,7 @@ App 基于React Native
 
 ## 后端
 
-后端基于Nest.js
+后端基于FastApi
 
 1. 用户信息模块
 2. 图像识别模块
