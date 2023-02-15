@@ -78,6 +78,7 @@
   - `Array.isArray(arr)` 是否数组
   - `.some(func)` `.every(func)` 有几个/每个都满足函数
   - `.fill(value,start,end)` 填充
+    - `Array(7).fill(0)` 常用于动态规划
   - `.copyWithin(target,start,end)` 复制自身部分到target
   - `.flat(depth)` `.flatMap(func)` 扁平化
   - `Array.of(7)` =>`[7]`

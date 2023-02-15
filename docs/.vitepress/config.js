@@ -29,7 +29,7 @@ export default {
         items: [
           { text: 'Python基础', link: '/others/python1' },
           { text: 'Python进阶', link: '/others/python2' },
-          { text: 'Django', link: '/others/django' },
+          { text: 'FastAPI', link: '/others/fastapi' },
           { text: '算法', link: '/others/algorithm' },
           { text: 'TensorFlow', link: '/others/tensorflow' },
           { text: 'Git 使用', link: '/others/git' },
@@ -54,7 +54,7 @@ export default {
           items: [
             { text: 'Python基础', link: '/others/python1' },
             { text: 'Python进阶', link: '/others/python2' },
-            { text: 'Django', link: '/others/django' },
+            { text: 'FastAPI', link: '/others/fastapi' },
             { text: 'TensorFlow', link: '/others/tensorflow' },
           ],
         },
@@ -149,14 +149,6 @@ export default {
             { text: 'NestJS', link: '/front-end/node/nestjs' },
           ],
         },
-        // {
-        //   text: 'Others',
-        //   collapsible: true,
-        //   items: [
-        //     { text: 'p5.js', link: '/front-end/ml5/p5' },
-        //     { text: 'ml5.js', link: '/front-end/ml5/machine' },
-        //   ],
-        // },
       ],
     },
   },
