@@ -64,10 +64,26 @@ def update_item(item_id: int, item: Item):
 
 ## 请求信息
 
+- 请求中的参数
+  - 路径参数同时写在path中即生效
+    - g大于 l小于 than equal
+  - 参数为单类型时取为query
+    - 每个参数分开
+    - 没有默认值为必须
+    - `Query(不写default或者=...)` 都表示必须
+    - 多值 `q: list[str]` `?q=foo&q=bar`
+    - alias title description deprecated min_length max_length regex
+  - 参数使用pydantic声明取为body
+    - 可多参数
+    - `Field` Pydantic 模型内部声明校验
+    - 可以嵌套模型
+
+
+
 ::: code-group
 ```py [路径参数]
 from enum import Enum
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -75,6 +91,17 @@ class ModelName(str, Enum):
     lenet = "lenet"
 
 app = FastAPI()
+
+@app.get("/items/{item_id}")
+async def read_items(
+    *,
+    item_id: int = Path(title="The ID of the item to get", gt=0, le=1000),
+    q: str,
+):
+    results = {"item_id": item_id}
+    if q:
+        results.update({"q": q})
+    return results
 
 @app.get("/models/{model_name}")
 async def get_model(model_name: ModelName):
@@ -87,11 +114,14 @@ async def get_model(model_name: ModelName):
     return {"model_name": model_name}
 ```
 ```py [查询参数]
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 app = FastAPI()
 
 @app.get("/items/{item_id}")
-async def read_item(item_id: str, q: str | None = None):
+async def read_item(
+    item_id: str, 
+    q: str | None = Query(default=None, max_length=5,regex="^reg")
+    ):
     if q:
         return {"item_id": item_id, "q": q}
     return {"item_id": item_id}
@@ -121,6 +151,35 @@ async def create_item(item_id: int, item: Item, q: str | None = None):
         result.update({"price_with_tax": price_with_tax})
     return result
 ```
+```py [Cookie]
+from fastapi import Cookie, FastAPI
+
+app = FastAPI()
+
+@app.get("/items/")
+async def read_items(ads_id: str | None = Cookie(default=None)):
+    return {"ads_id": ads_id}
+```
+```py [Header]
+from fastapi import FastAPI, Header
+
+app = FastAPI()
+
+@app.get("/items/")
+async def read_items(user_agent: str | None = Header(default=None)):
+    return {"User-Agent": user_agent}
+```
 :::
 
+
+## 额外数据类型
+
+- `UUID` 数据库做ID
+- `datetime.datetime` 时间
+- `datetime.date` 日期
+- `datetime.time` 时间间隔
+- `datetime.timedelta` 秒差
+- `frozenset` set
+- `bytes` 字节
+- `Decimal` 小数
 
