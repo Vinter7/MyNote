@@ -21,7 +21,7 @@
   - `wx.navigateTo` `<navigator open-type="navigateTo"/>` 去非 tabBar 页面
   - `wx.redirectTo` `<navigator open-type="redirectTo"/>` 重定向
   - `wx.navigateBack` `<navigator open-type="navigateBack">` 回
-  - `wx.switchTab` `<navigator open-type="switchTab"/>` 切非 tabBar 页面
+  - `wx.switchTab` `<navigator open-type="switchTab"/>` 切tabBar 页面
   - `wx.reLaunch` `<navigator open-type="reLaunch"/>` 重启任意页面
 
 ::: code-group
