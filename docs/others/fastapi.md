@@ -186,10 +186,47 @@ async def read_items(user_agent: str | None = Header(default=None)):
 ## 响应模型
 
 
+## 中间件
+
+```py
+import time
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+@app.middleware("http")
+async def theTime(request: Request, call_next):
+    start_time = time.time()
+    # 处理前
+    response = await call_next(request)
+    # 处理后
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+```
 
 
+## CORS
+
+```py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
+@app.get("/")
+async def main():
+    return {"message": "Hello World"}
+```
 
 
 ## ORM
@@ -363,4 +400,40 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 ```
 :::
 
+
+## 文件组织
+
+
+## 后台任务
+
+```py
+from fastapi import BackgroundTasks, FastAPI
+
+app = FastAPI()
+
+# 具体任务
+def write_notification(email: str, message=""):
+    with open("log.txt", mode="w") as email_file:
+        content = f"notification for {email}: {message}"
+        email_file.write(content)
+
+
+@app.post("/send-notification/{email}")
+async def send_notification(email: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(write_notification, email, message="some notification")
+    return {"message": "Notification sent in the background"}
+```
+
+
+## 静态文件
+
+
+```py
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+```
 
