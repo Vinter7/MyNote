@@ -1,6 +1,5 @@
 # 网络请求
 
----
 
 ## Ajax
 
@@ -192,15 +191,15 @@ let results = await Promise.all(fetchJobs);
 **Fetch API**
 
 - `method` 'GET' 
-- `headers` {"Content-Type": "text/plain;charset=UTF-8"}
+- `headers` `{"Content-Type": "text/plain;charset=UTF-8"}`
 - `body` undefined string，FormData，Blob，BufferSource URLSearchParams
-- `referrer` "about:client" "" 发出请求的页面的 url
+- `referrer` "about:client" 发出请求的页面的 url
 - `referrerPolicy` "no-referrer-when-downgrade" no-referrer，origin，same-origin...
 - `mode` "cors" same-origin，no-cors 跨源
 - `credentials` "same-origin" omit，include 发cookie
 - `cache` "default" no-store，reload，no-cache，force-cache only-if-cached 缓存
 - `redirect` "follow" manual，error 重定向
-- `integrity` "" hash值 校验
+- `integrity` hash值 校验
 - `keepalive` false true 请求在网页关闭后继续存在
 - `signal` undefined AbortController
 - `window` window null
