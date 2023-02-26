@@ -62,7 +62,7 @@ def update_item(item_id: int, item: Item):
 ```
 :::
 
-## 请求信息
+## 请求
 
 - 请求中的参数
   - 路径参数同时写在path中即生效
@@ -77,6 +77,10 @@ def update_item(item_id: int, item: Item):
     - 可多参数
     - `Field` Pydantic 模型内部声明校验
     - 可以嵌套模型
+- 响应
+  - 通过 response_model 参数来定义响应模型
+  - 使用 status_code 参数声明状态码
+- 多模型间可用继承
 
 
 
@@ -171,19 +175,283 @@ async def read_items(user_agent: str | None = Header(default=None)):
 ```
 :::
 
+## 校验
 
-## 额外数据类型
+前面的部分应该拆分成请求和校验
 
-- `UUID` 数据库做ID
-- `datetime.datetime` 时间
-- `datetime.date` 日期
-- `datetime.time` 时间间隔
-- `datetime.timedelta` 秒差
-- `frozenset` set
-- `bytes` 字节
-- `Decimal` 小数
+等有空了改下
 
-## 响应模型
+
+## 表单和文件
+
+- 当接受的并非JSON而是表单时使用`Form`
+- `pip install python-multipart`
+- UploadFile
+  - filename content_type file
+  - write(data) read(?size) seek(offset) close()
+
+::: code-group
+```py [字段]
+from fastapi import FastAPI, Form
+
+app = FastAPI()
+
+@app.post("/login/")
+async def login(username: str = Form(), password: str = Form()):
+    return {"username": username}
+```
+```py [文件]
+from fastapi import FastAPI, File, UploadFile
+
+app = FastAPI()
+
+@app.post("/files/")
+async def create_file(file: bytes = File()):
+    return {"file_size": len(file)}
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile):
+    return {"filename": file.filename}
+```
+```py [同时]
+from fastapi import FastAPI, File, Form, UploadFile
+
+app = FastAPI()
+
+@app.post("/files/")
+async def create_file(
+    file: bytes = File(), fileb: UploadFile = File(), token: str = Form()
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
+```
+:::
+
+
+
+## 杂项
+
+- 错误处理
+  - `from fastapi import HTTPException`
+  - `raise HTTPException(status_code=404, detail="Item not found")`
+- 路径操作配置
+  - 通过传递参数给路径操作装饰器 ，即可轻松地配置路径操作、添加元数据
+- JSON 兼容编码器
+  - `jsonable_encoder(item)`
+- 额外数据类型
+  - `UUID` 数据库做ID
+  - `datetime.datetime` 时间
+  - `datetime.date` 日期
+  - `datetime.time` 时间间隔
+  - `datetime.timedelta` 秒差
+  - `frozenset` set
+  - `bytes` 字节
+  - `Decimal` 小数
+- PUT & PATCH
+
+
+## 依赖注入
+
+要造汽车,可以买来所有的原材料属性丢进构造函数里,汽车类里面又分成引擎,轮胎等多个类,要是其中一个类要加一个属性,那么一层层的直到汽车类的构造函数里都要引入新的原材料,这样的话就比较麻烦了.因此使用依赖注入,造汽车我不关心你轮胎,引擎怎么造,我只要直接去买轮胎引擎就好了.在构造函数里我直接就输入的是轮胎对象,引擎对象,我自己只要再加个标牌就完事了,这样的方法就叫依赖注入,其目的叫控制反转.
+
+::: code-group
+```py [函数]
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+@app.get("/items/")
+async def read_items(commons: dict = Depends(common_parameters)):
+    return commons
+
+@app.get("/users/")
+async def read_users(commons: dict = Depends(common_parameters)):
+    return commons
+```
+```py [类]
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+class CommonQueryParams:
+    def __init__(self, q: str | None = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+@app.get("/items/")
+async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
+    response = {}
+    if commons.q:
+        response.update({"q": commons.q})
+    items = fake_items_db[commons.skip : commons.skip + commons.limit]
+    response.update({"items": items})
+    return response
+```
+:::
+
+## 安全
+
+- 登录验证
+  - 手机号和密码发给后端
+  - 密码转哈希存入数据库完成注册
+  - 登录时发送手机号和密码
+  - 查询数据库
+  - 验证哈希后生成token
+  - 后端返回token
+  - 前端保存token到LocalStorage
+- 登录保持
+  - 前端发送请求时把token放在请求头中
+  - 后端获取token并检验有效性
+  - 得出手机号并去数据库读取请求内容
+  - 返回响应
+
+::: code-group
+```py [main]
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from passlib.context import CryptContext
+from jose import jwt
+from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from orm import UserAll, hasUser, c_user, u_user, engine, SessionLocal, Base
+# 连接数据库
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+theHash = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+KEY = "09d25e094fa"
+
+def c_token(phone: str):
+    expire = datetime.utcnow()+timedelta(days=7)
+    info = {"phone": phone, "exp": expire}
+    return jwt.encode(info, KEY)
+
+def r_token(token: str):
+    info = jwt.decode(token, KEY, "HS256")
+    return info.get("phone"), info.get('exp')
+
+@app.post("/user/sign")
+# 注册
+def sign(user: UserAll, db: Session = Depends(get_db)):
+    # 数据校验pass
+    if (hasUser(db, user.phone)):
+        return "用户已存在"
+    user.password = theHash.hash(user.password)
+    return c_user(db=db, user=user)
+
+@app.get("/user/login")
+# 登录
+def login(user: UserAll, db: Session = Depends(get_db)):
+    pwd = hasUser(db, user.phone)
+    if (not pwd):
+        return '无用户'
+    if (theHash.verify(user.password, pwd)):
+        return c_token(user.phone)
+    else:
+        return "密码错误"
+
+@app.post("/user/update")
+# 改
+def update(user: UserAll, db: Session = Depends(get_db)):
+    # 验证权限
+    return u_user(db, user)
+
+@app.get("/user/me")
+def test(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token"))):
+    print(token)
+    return r_token(token)
+```
+```py [orm]
+from sqlalchemy import create_engine, Boolean, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from pydantic import BaseModel
+
+engine = create_engine(
+    "sqlite:///./sql_app.db",
+    connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# 表类
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    phone = Column(String, unique=True, index=True)
+    password = Column(String)
+    username = Column(String)
+    status = Column(Boolean, default=True)
+
+class UserBase(BaseModel):
+    phone: str
+
+class UserCreate(BaseModel):
+    password: str
+    username: str | None = None
+
+class UserAll(UserBase):
+    password: str | None = None
+    username: str | None = None
+    is_active: bool | None = None
+
+def hasUser(db: Session, phone: str):
+    u = db.query(User).filter(User.phone == phone).first()
+    if (u):
+        return u.password
+    else:
+        return False
+
+# curd create update read delete
+
+def c_user(db: Session, user: UserCreate):
+    username = user.username
+    if (username == None):
+        username = user.phone[-4:]
+
+    db_user = User(
+        phone=user.phone,
+        password=user.password,
+        username=username
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return True
+
+def u_user(db: Session, user: UserAll):
+    arr = ['password', 'username', 'is_active']
+    dic = {}
+    for i in arr:
+        print(i)
+        if (user.__dict__[i] == None):
+            continue
+        dic[i] = user.__dict__[i]
+    db.query(User).filter(User.phone == user.phone).update(dic)
+    db.commit()
+    return True
+```
+:::
 
 
 ## 中间件
