@@ -2,7 +2,6 @@
 
 [文档](https://pinia.vuejs.org/zh/)
 
-----
 
 ## 快速上手
 

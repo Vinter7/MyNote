@@ -2,42 +2,44 @@
 
 [文档](https://router.vuejs.org/zh/)
 
-----
-
 ## 快速上手
 
 CDN: `https://unpkg.com/vue-router@4`
 
-npm: `npm install vue-router@4`
+npm: `npm install vue-router`
 
-```html
-<router-link to="/url">在不重新加载页面的情况下更改 URL</router-link>
-<!-- 路由出口 -->
-<router-view></router-view>
-```
 
-```js
-// 组件
-const Home = { template: '<div>Home</div>' }
-const About = { template: '<div>About</div>' }
-// 路由列表
-const routes = [
-  { path: '/', component: Home },
-  { path: '/about', component: About },
-]
-// 路由示例
-const router = VueRouter.createRouter({
-  // history模式 必选
-  history: VueRouter.createWebHashHistory(),
-  routes,
+::: code-group
+```js [index]
+import { createRouter, createWebHashHistory } from 'vue-router'
+import Main from 'Main.vue'
+import About from 'About.vue'
+
+export default createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path:'/',
+      component: Main,
+    },
+    {
+      path:'/about',
+      component: About,
+    },
+  ]
 })
-
-// 创建并挂载根实例
-const app = Vue.createApp({})
-app.use(router)
-app.mount('#app')
 ```
-```js
+```js [main]
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+createApp(App)
+  .use(router)
+  .mount('#app')
+```
+```vue [app]
+<script setup>
 //选项式
 this.$route.params.username //查看路由参数
 this.$router.push('/login') //跳转路由
@@ -47,7 +49,14 @@ const router = useRouter()
 const route = useRoute()
 route.params.username //路由参数
 router.push('/login') //跳转路由
+</script>
+<template>
+  <router-link to="/url">在不重新加载页面的情况下更改 URL</router-link>
+  <!-- 路由出口 -->
+  <router-view></router-view>
+</template>
 ```
+:::
 
 ## 动态路由
 
